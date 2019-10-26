@@ -20,7 +20,12 @@ def main():
 			tracker.update()
 
 		for assign in tracker.assignments:
-			print(assign.name, 'due in', getDueDate(assign)-datetime.now())
+			diff = getDueDate(assign) - datetime.now()
+			print(assign.id, 'due in', diff.days, 'days')
+			if diff.days == 1:
+				print(assign.name, 'shit is due my guy', '!'*20)
+				tracker.remove(assign)
+
 		time.sleep(DATE_CHECK_INTERVAL_SEC)
 
 	# Useful commands:
@@ -58,6 +63,18 @@ class AssTracker:
 
 		self._sort()
 		self.last_updated = datetime.now()
+
+	def remove(self, assign: assignment.Assignment):
+		'''
+		Takes the assignment out of the tracking list.
+
+		Does not take the assignment id out if the set!
+		'''
+		try:
+			self.assignments.remove(assign)
+			return True
+		except ValueError:
+			return False
 
 	def _seen(self, assign: assignment.Assignment):
 		return assign.id in self._assignment_set

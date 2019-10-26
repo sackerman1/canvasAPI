@@ -1,31 +1,38 @@
 from canvasapi import Canvas, course, assignment
 import canvasapi
-from parse import *
 from datetime import datetime
 from twilio.rest import Client
+import os
+import time
 
 
 
 def main():
-	token = '13171~dvg11q0NmH6ZsUUXWEwbqSVjqS5cr5zchyTz49ZiXtn8lKqbt1xRhQgQ2n45YyaL'
-	url = 'https://ucsd.instructure.com/api/v1/users/self'
+	# token = '13171~dvg11q0NmH6ZsUUXWEwbqSVjqS5cr5zchyTz49ZiXtn8lKqbt1xRhQgQ2n45YyaL'
+	# url = 'https://ucsd.instructure.com/api/v1/users/self'
+
+	token = os.getenv('CANVAS_TOKEN')
+	url = os.getenv('CANVAS_URL')
+	if token is None or url is None:
+		raise Exception(f'url: {url}, token: {token}')
 	canvas = Canvas(url, token)
 	user = canvas.get_current_user()
-	print(user.id)
 
 	assignmentList = []
-	for assign in getAssignments(canvas):
-		if(not isPast(getDueDate(assign))):
-			assignmentList.append(assign)
+	lastUpdated = update_conveyor_belt(assignmentList, canvas)
 
-	for assign in assignmentList:
-		print(assign, 'due in', getDueDate(assign)-datetime.now())
+	while True:
+		# timeDiff = lastUpdated - datetime.now()
+		timeDiff = datetime.now() - lastUpdated
+		print(timeDiff, timeDiff.days)
+		if timeDiff.seconds >= 10:
+		# if timeDiff.days >= 1:
+			lastUpdated = update_conveyor_belt(assignmentList, canvas)
 
-	assignmentList = sortListByDate(assignmentList)
-	print('-'*150)
-
-	for assign in assignmentList:
-		print(assign, 'due in', getDueDate(assign)-datetime.now())
+		assignmentList = sortListByDate(assignmentList)
+		for assign in assignmentList:
+			print(assign, 'due in', getDueDate(assign)-datetime.now())
+		time.sleep(1)
 
 	# Useful commands:
 	# canvas.get_courses(); Gets list of all courses for the user
@@ -33,6 +40,14 @@ def main():
 	# assignment.due_at; Gets due date of assignment
 
 
+def update_conveyor_belt(belt: list, canvas: Canvas) -> datetime:
+	for i, assin in enumerate(belt):
+		if isPast(getDueDate(assin)):
+			del belt[i]
+	for assign in getAssignments(canvas):
+		if not isPast(getDueDate(assign)):
+			belt.append(assign)
+	return datetime.now()
 
 def courseHasEnded(crse):
 	return course.end_at_date.replace(tzinfo=None) < datetime.now(None)

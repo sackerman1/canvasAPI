@@ -7,22 +7,12 @@ def main():
 	url = 'https://ucsd.instructure.com/api/v1/users/self'
 	canvas = Canvas(url, token)
 	user = canvas.get_current_user()
-	temp = []
-	for course in canvas.get_courses():
-		for assign in course.get_assignments():
-			temp.append(getDueDate(assign))
-			print(assign, 'due in', getDueDate(assign)-datetime.now())
-			myTemp = assign.due_at
-	#print(temp)
-
-
-
-	# print(getAssignments(canvas)[0]['id'])
-# for gen in user.get_profile():
-# 	print(gen)
-# for course in canvas.get_courses():
-# 	for feet in course.get_enabled_features():
-# 		print(feet)	
+	for classmate in getClassMates(canvas):
+		print(classmate)
+	# Useful commands:
+	# canvas.get_courses(); Gets list of all courses for the user
+	# course.get_assignments(); Gets a list of all get_assignment
+	# assignment.due_at; Gets due date of assignment
 
 
 

@@ -13,9 +13,6 @@ def main():
 
 	token = os.getenv('CANVAS_TOKEN')
 	url = os.getenv('CANVAS_URL')
-	if token is None or url is None:
-		raise Exception(f'url: {url}, token: {token}')
-	canvas = Canvas(url, token)
 
 	tracker = AssTracker(url, token)
 	while True:
@@ -58,10 +55,6 @@ class AssTracker:
 
 		self.assignments = sortListByDate(self.assignments)
 		self.last_updated = datetime.now()
-
-
-def courseHasEnded(crse):
-	return course.end_at_date.replace(tzinfo=None) < datetime.now(None)
 
 
 def getClassMates(canvas: Canvas):

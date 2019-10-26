@@ -1,4 +1,5 @@
 from canvasapi import Canvas
+import canvasapi
 from parse import *
 from datetime import datetime
 
@@ -14,22 +15,25 @@ def main():
 	# assignment.due_at; Gets due date of assignment
 
 
+def courseHasEnded(course: canvasapi.Course):
+	return course.end_at_date.replace(tzinfo=None) < datetime.now(None)
 
-def getClassMates(canvas):
+
+def getClassMates(canvas: Cavnvas):
 	temp = []
 	for course in canvas.get_courses():
 		for user in course.get_users():
 			temp.append(user)
 	return temp
 
-def getAssignments(canvas):
+def getAssignments(canvas: Canvas):
 	temp = []
 	for course in canvas.get_courses():
 		for assign in course.get_assignments():
 			temp.append(assign)
 	return temp
 
-def getDueDate(assignment):
+def getDueDate(assignment: canvasapi.Assignment):
 	if assignment.due_at is not None:
 		return datetime.strptime(assignment.due_at, "%Y-%m-%dT%H:%M:%SZ")
 	else:

@@ -18,14 +18,15 @@ def main():
 		if(not isPast(getDueDate(assign))):
 			assignmentList.append(assign)
 
+	assignmentList = sortListByDate(assignmentList)
 	for assign in assignmentList:
 		print(assign, 'due in', getDueDate(assign)-datetime.now())
 
-	assignmentList = sortListByDate(assignmentList)
+	
 	print('-'*150)
 
-	for assign in assignmentList:
-		print(assign, 'due in', getDueDate(assign)-datetime.now())
+	#for assign in assignmentList:
+	#textMessage(assign.name + ' due in ' + (str)(getDueDate(assign)-datetime.now()))
 
 	# Useful commands:
 	# canvas.get_courses(); Gets list of all courses for the user
@@ -54,7 +55,7 @@ def getAssignments(canvas: Canvas):
 
 def getDueDate(assignment):
 	if assignment.due_at is not None:
-		return datetime.strptime(assignment.due_at, "%Y-%m-%dT%H:%M:%SZ")
+		return getDate(assignment.due_at)
 	else:
 		return datetime(1,1,1)
 
@@ -71,18 +72,21 @@ def sortListByDate(assList):
 	assList.sort(key=lambda date: datetime.strptime(date.due_at, "%Y-%m-%dT%H:%M:%SZ"))
 	return assList
 
+def textMessage(message):
+	account_sid = "AC6fd8ad98a091f7f743b8806561981df5"
+	auth_token = "9141a3145a01567f2a84df0a4ff07198"
+	client = Client(account_sid, auth_token)
+
+	call = client.messages.create(
+	    to="+19258764016",
+	    from_="19253930247",
+	    body= message
+	)
+
 main()
 
 
 
 
-# account_sid = "AC6fd8ad98a091f7f743b8806561981df5"
-# auth_token = "9141a3145a01567f2a84df0a4ff07198"
-# client = Client(account_sid, auth_token)
 
-# call = client.messages.create(
-#     to="+19258764016",
-#     from_="19253930247",
-#     body='suck on deez nuts'
-# )
 

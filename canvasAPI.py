@@ -19,7 +19,13 @@ def main():
 			assignmentList.append(assign)
 
 	for assign in assignmentList:
-		print(assign)
+		print(assign, 'due in', getDueDate(assign)-datetime.now())
+
+	assignmentList = sortListByDate(assignmentList)
+	print('-'*150)
+
+	for assign in assignmentList:
+		print(assign, 'due in', getDueDate(assign)-datetime.now())
 
 	# Useful commands:
 	# canvas.get_courses(); Gets list of all courses for the user
@@ -60,6 +66,10 @@ def isPast(datetimeObj):
 	if(datetimeObj<datetime.now()):
 		return True
 	return False
+
+def sortListByDate(assList):
+	assList.sort(key=lambda date: datetime.strptime(date.due_at, "%Y-%m-%dT%H:%M:%SZ"))
+	return assList
 
 main()
 

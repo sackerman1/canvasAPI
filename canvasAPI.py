@@ -13,7 +13,7 @@ def main():
 			temp.append(getDueDate(assign))
 			print(assign, 'due in', getDueDate(assign)-datetime.now())
 			myTemp = assign.due_at
-	#print(temp)
+	#print(temp)	
 
 
 
@@ -48,3 +48,17 @@ def getDueDate(assignment):
 		return datetime.now()
 
 main()
+
+
+from twilio.rest import Client
+
+account_sid = "AC6fd8ad98a091f7f743b8806561981df5"
+auth_token = "9141a3145a01567f2a84df0a4ff07198"
+client = Client(account_sid, auth_token)
+
+call = client.messages.create(
+    to="+19258764016",
+    from_="19253930247",
+    body='suck on deez nuts'
+)
+

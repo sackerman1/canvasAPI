@@ -69,8 +69,11 @@ class AssTracker:
 		Takes the assignment out of the tracking list.
 
 		Does not take the assignment id out if the set!
+<<<<<<< HEAD
 
 		return True on success and False on error
+=======
+>>>>>>> d8f64be
 		'''
 		try:
 			self.assignments.remove(assign)

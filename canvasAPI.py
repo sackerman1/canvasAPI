@@ -1,10 +1,10 @@
 from canvasapi import Canvas, course, assignment
 import canvasapi
+import datetime as dt
 from datetime import datetime
 from twilio.rest import Client
 import os
 import time
-
 
 
 def main():
@@ -16,23 +16,15 @@ def main():
 	if token is None or url is None:
 		raise Exception(f'url: {url}, token: {token}')
 	canvas = Canvas(url, token)
-	user = canvas.get_current_user()
 
-	assignmentList = []
-	lastUpdated = update_conveyor_belt(assignmentList, canvas)
-
+	tracker = AssTracker(url, token)
 	while True:
-		# timeDiff = lastUpdated - datetime.now()
-		timeDiff = datetime.now() - lastUpdated
-		print(timeDiff, timeDiff.days)
-		if timeDiff.seconds >= 10:
-		# if timeDiff.days >= 1:
-			lastUpdated = update_conveyor_belt(assignmentList, canvas)
+		if tracker.should_update():
+			tracker.update()
 
-		assignmentList = sortListByDate(assignmentList)
-		for assign in assignmentList:
+		for assign in tracker.assignments:
 			print(assign, 'due in', getDueDate(assign)-datetime.now())
-		time.sleep(1)
+		time.sleep(5)
 
 	# Useful commands:
 	# canvas.get_courses(); Gets list of all courses for the user
@@ -40,14 +32,33 @@ def main():
 	# assignment.due_at; Gets due date of assignment
 
 
-def update_conveyor_belt(belt: list, canvas: Canvas) -> datetime:
-	for i, assin in enumerate(belt):
-		if isPast(getDueDate(assin)):
-			del belt[i]
-	for assign in getAssignments(canvas):
-		if not isPast(getDueDate(assign)):
-			belt.append(assign)
-	return datetime.now()
+class AssTracker:
+	def __init__(self, url, token, update_period = dt.timedelta(days=1)):
+		self.canvas = Canvas(url, token)
+		self.update_period = update_period
+
+		self.assignments = []
+		self.last_updated = None # resets when update is called
+
+		# setup
+		self.update()
+
+	def should_update(self):
+		diff = datetime.now() - self.last_updated
+		return diff >= self.update_period
+
+	def update(self):
+		for i, assign in enumerate(self.assignments):
+			if isPast(getDueDate(assign)):
+				del self.assignments[i]
+
+		for assign in getAssignments(self.canvas):
+			if not isPast(getDueDate(assign)):
+				self.assignments.append(assign)
+
+		self.assignments = sortListByDate(self.assignments)
+		self.last_updated = datetime.now()
+
 
 def courseHasEnded(crse):
 	return course.end_at_date.replace(tzinfo=None) < datetime.now(None)

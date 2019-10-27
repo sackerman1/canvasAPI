@@ -27,6 +27,7 @@ def main():
 			print(assign.id, 'due in', diff.days, 'days')
 			if diff.days == 1:
 				print(assign.name, 'shit is due my guy', '!'*20)
+				send_message(assign.name + ' is due in ' (str)(diff))
 				tracker.remove(assign)
 
 		time.sleep(DATE_CHECK_INTERVAL_SEC)
@@ -135,16 +136,18 @@ if __name__ == '__main__':
 		print('\nexiting...')
 		exit(0)
 
+def send_message(message):
+	account_sid = "AC6fd8ad98a091f7f743b8806561981df5"
+	auth_token = "9141a3145a01567f2a84df0a4ff07198"
+	client = Client(account_sid, auth_token)
+
+	call = client.messages.create(
+ 	   to="+19258764016",
+ 	   from_="19253930247",
+ 	   body=message
+	)
 
 
 
-# account_sid = "AC6fd8ad98a091f7f743b8806561981df5"
-# auth_token = "9141a3145a01567f2a84df0a4ff07198"
-# client = Client(account_sid, auth_token)
 
-# call = client.messages.create(
-#     to="+19258764016",
-#     from_="19253930247",
-#     body='suck on deez nuts'
-# )
 

@@ -8,11 +8,11 @@ import time
 
 
 def main():
-	# token = '13171~dvg11q0NmH6ZsUUXWEwbqSVjqS5cr5zchyTz49ZiXtn8lKqbt1xRhQgQ2n45YyaL'
-	# url = 'https://ucsd.instructure.com/api/v1/users/self'
+	token = '13171~dvg11q0NmH6ZsUUXWEwbqSVjqS5cr5zchyTz49ZiXtn8lKqbt1xRhQgQ2n45YyaL'
+	url = 'https://ucsd.instructure.com/api/v1/users/self'
 
-	token = os.getenv('CANVAS_TOKEN')
-	url = os.getenv('CANVAS_URL')
+	# token = os.getenv('CANVAS_TOKEN')
+	# url = os.getenv('CANVAS_URL')
 
 	tracker = AssTracker(url, token)
 	while True:

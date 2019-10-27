@@ -7,21 +7,29 @@ import os
 import time
 
 
+
 def main():
 	token = '13171~dvg11q0NmH6ZsUUXWEwbqSVjqS5cr5zchyTz49ZiXtn8lKqbt1xRhQgQ2n45YyaL'
 	url = 'https://ucsd.instructure.com/api/v1/users/self'
 
 	# token = os.getenv('CANVAS_TOKEN')
 	# url = os.getenv('CANVAS_URL')
+	DATE_CHECK_INTERVAL_SEC = 3
 
-	tracker = AssTracker(url, token)
+	tracker = AssTracker(url, token, dt.timedelta(seconds=10))
 	while True:
 		if tracker.should_update():
+			print('updating...')
 			tracker.update()
 
 		for assign in tracker.assignments:
-			print(assign, 'due in', getDueDate(assign)-datetime.now())
-		time.sleep(5)
+			diff = getDueDate(assign) - datetime.now()
+			print(assign.id, 'due in', diff.days, 'days')
+			if diff.days == 1:
+				print(assign.name, 'shit is due my guy', '!'*20)
+				tracker.remove(assign)
+
+		time.sleep(DATE_CHECK_INTERVAL_SEC)
 
 	# Useful commands:
 	# canvas.get_courses(); Gets list of all courses for the user
@@ -35,6 +43,7 @@ class AssTracker:
 		self.update_period = update_period
 
 		self.assignments = []
+		self._assignment_set = set()
 		self.last_updated = None # resets when update is called
 
 		# setup
@@ -48,13 +57,41 @@ class AssTracker:
 		for i, assign in enumerate(self.assignments):
 			if isPast(getDueDate(assign)):
 				del self.assignments[i]
+				del self._assignment_set[assign.id]
 
-		for assign in getAssignments(self.canvas):
-			if not isPast(getDueDate(assign)):
+		for assign in self._get_assignments():
+			if not self._seen(assign) and not isPast(getDueDate(assign)):
 				self.assignments.append(assign)
+				self._assignment_set.add(assign.id)
 
-		self.assignments = sortListByDate(self.assignments)
+		self._sort()
 		self.last_updated = datetime.now()
+
+	def remove(self, assign: assignment.Assignment):
+		'''
+		Takes the assignment out of the tracking list.
+
+		Does not take the assignment id out if the set!
+
+		return True on success and False on error
+		'''
+		try:
+			self.assignments.remove(assign)
+			return True
+		except ValueError:
+			return False
+
+	def _seen(self, assign: assignment.Assignment):
+		return assign.id in self._assignment_set
+
+	def _sort(self):
+		self.assignments.sort(key=lambda date: datetime.strptime(date.due_at, "%Y-%m-%dT%H:%M:%SZ"))
+
+	def _get_assignments(self):
+		for course in self.canvas.get_courses():
+			if course.end_at is not None and isPast(course.end_at_date.replace(tzinfo=None)):
+				continue
+			yield from course.get_assignments()
 
 
 def getClassMates(canvas: Canvas):
@@ -90,7 +127,13 @@ def sortListByDate(assList):
 	assList.sort(key=lambda date: datetime.strptime(date.due_at, "%Y-%m-%dT%H:%M:%SZ"))
 	return assList
 
-main()
+
+if __name__ == '__main__':
+	try:
+		main()
+	except KeyboardInterrupt: # for clean stops locally
+		print('\nexiting...')
+		exit(0)
 
 
 
